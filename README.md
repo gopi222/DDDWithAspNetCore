@@ -1,2 +1,2 @@
 # DddWithAspNetCore
-This repository contain the implementation of domain driven design and clear architecture in ASP.NET Core.
+Asp.net core web API with DDD architecture (.net core version 3.1)
