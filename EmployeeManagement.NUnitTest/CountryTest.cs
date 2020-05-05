@@ -10,7 +10,13 @@ namespace EmployeeManagement.NUnitTest
         }
 
         [Test]
-        public void Test1()
+        public void GetCountry()
+        {
+            Assert.Pass();
+        }
+
+        [Test]
+        public void GetCountryDetails()
         {
             Assert.Pass();
         }
