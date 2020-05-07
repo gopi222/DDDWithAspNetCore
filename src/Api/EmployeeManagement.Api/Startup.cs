@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using TanvirArjel.EFCore.GenericRepository;
 
 namespace EmployeeManagement.Api
@@ -39,6 +40,11 @@ namespace EmployeeManagement.Api
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "Student Management", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +55,13 @@ namespace EmployeeManagement.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "My API v1");
+            });
 
             app.UseHttpsRedirection();
 
