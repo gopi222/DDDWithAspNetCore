@@ -41,6 +41,11 @@ namespace EmployeeManagement.Api
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             });
 
+            services.AddStackExchangeRedisCache(option =>
+            {
+                option.Configuration = "localhost:6379";
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "Student Management", Version = "v1" });

@@ -47,9 +47,9 @@ namespace EmployeeManagement.Api.Controllers
         }
 
         [HttpGet("{countryId}")]
-        public async Task<CountryDetailsModel> GetCountry(int CountryId)
+        public async Task<CountryDetailsModel> GetCountry(int countryId)
         {
-            CountryDetailsDto countryDetailsDto = await _countryService.GetCountryAsync(CountryId);
+            CountryDetailsDto countryDetailsDto = await _countryService.GetCountryAsync(countryId);
             CountryDetailsModel countryDetailsModel = _mapper.Map<CountryDetailsModel>(countryDetailsDto);
             return countryDetailsModel;
         }
@@ -63,9 +63,9 @@ namespace EmployeeManagement.Api.Controllers
         }
 
         [HttpDelete("{countryId}")]
-        public async Task<IActionResult> DeleteCountry(int CountryId)
+        public async Task<IActionResult> DeleteCountry(int countryId)
         {
-            await _countryService.DeleteCountry(CountryId);
+            await _countryService.DeleteCountry(countryId);
             return Ok();
         }
     }
