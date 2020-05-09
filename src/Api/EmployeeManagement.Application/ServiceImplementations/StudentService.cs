@@ -1,9 +1,11 @@
 ﻿using EmployeeManagement.Application.Dtos.StudentDtos;
 using EmployeeManagement.Application.Services;
 using EmployeeManagement.Domain.Entities;
+using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository.Services;
 
@@ -12,11 +14,13 @@ namespace EmployeeManagement.Application.ServiceImplementations
     public class StudentService : IStudentService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDistributedCache _redisCache;
 
-        public StudentService(IUnitOfWork unitOfWork)
+        public StudentService(IUnitOfWork unitOfWork, IDistributedCache redisCache)
         {
             _unitOfWork = unitOfWork;
-        }
+            _redisCache = redisCache;
+    }
 
         public async Task<List<StudentDetailsDto>> GetStudentListAsync()
         {
@@ -35,10 +39,24 @@ namespace EmployeeManagement.Application.ServiceImplementations
                 LastModifiedAtUtc = e.LastModifiedAtUtc
             };
 
-            List<StudentDetailsDto> studentDetailsDtos = await _unitOfWork.Repository<Student>()
-                .GetProjectedEntityListAsync(selectExpression);
+            string cachedStudentList = await _redisCache.GetStringAsync("studentlist");
 
-            return studentDetailsDtos;
+            if (cachedStudentList == null || string.IsNullOrEmpty(cachedStudentList))
+            {
+                var studentList = await _unitOfWork.Repository<Student>().GetProjectedEntityListAsync(selectExpression);
+                cachedStudentList = JsonSerializer.Serialize<List<StudentDetailsDto>>(studentList);
+                var options = new DistributedCacheEntryOptions();
+                options.SetAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(1));
+                await _redisCache.SetStringAsync("studentlist", cachedStudentList, options);
+            }
+
+            JsonSerializerOptions opt = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var studentListReturn = JsonSerializer.Deserialize<List<StudentDetailsDto>>(cachedStudentList, opt);
+            return studentListReturn;
         }
 
         public async Task<StudentDetailsDto> GetStudentDetailsAsync(int studentId)

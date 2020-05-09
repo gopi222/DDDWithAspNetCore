@@ -17,20 +17,33 @@ namespace EmployeeManagement.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IWebHostEnvironment evn, IConfiguration configuration)
         {
+            HostEnvironment = evn;
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
 
+        public IWebHostEnvironment HostEnvironment { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContextPool<EmployeeManagementDbContext>(options =>
+            if (HostEnvironment.EnvironmentName == "Development")
             {
-                options.UseSqlServer(Configuration.GetConnectionString("EmployeeDbConnection"));
-            });
+                services.AddDbContextPool<EmployeeManagementDbContext>(options =>
+                {
+                    options.UseSqlServer(Configuration.GetConnectionString("EmployeeDbConnectionLocal"));
+                });
+            }
+            else
+            {
+                services.AddDbContextPool<EmployeeManagementDbContext>(options =>
+                {
+                    options.UseSqlServer(Configuration.GetConnectionString("EmployeeDbConnectionAzure"));
+                });
+            }
 
             services.AddGenericRepository<EmployeeManagementDbContext>();
 
@@ -41,9 +54,9 @@ namespace EmployeeManagement.Api
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             });
 
-            services.AddStackExchangeRedisCache(option =>
+            services.AddStackExchangeRedisCache(options =>
             {
-                option.Configuration = "localhost:6379";
+                options.Configuration = Configuration.GetConnectionString("AzureRedisCache"); //Configuration["Data:ConectionStrings:AzureRedisCache"];
             });
 
             services.AddSwaggerGen(c =>
