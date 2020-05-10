@@ -56,13 +56,14 @@ namespace EmployeeManagement.Api
 
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = Configuration.GetConnectionString("AzureRedisCache"); //Configuration["Data:ConectionStrings:AzureRedisCache"];
+                options.Configuration = Configuration.GetConnectionString("AzureRedisCache");
             });
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "Student Management", Version = "v1" });
             });
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
